@@ -10,6 +10,7 @@ import { Passage, ViewMode, ThemeMode, ToastState, ToastType } from './types';
 import { initialPassages } from './data/passages';
 import { StudentDashboard } from './components/student/StudentDashboard';
 import { TeacherDashboard } from './components/teacher/TeacherDashboard';
+import { Analytics } from '@vercel/analytics/react';
 import './index.css';
 
 export default function App(): JSX.Element {
@@ -29,6 +30,7 @@ export default function App(): JSX.Element {
 
   return (
     <div className={`app-root ${theme}`}>
+      <Analytics />
       {toast.show && (
         <div className={`toast ${toast.type}`}>
           {toast.type === 'error' ? <AlertCircle size={16} /> : <CheckCircle2 size={16} />}
