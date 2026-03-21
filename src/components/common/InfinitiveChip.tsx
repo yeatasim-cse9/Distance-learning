@@ -21,7 +21,9 @@ export const InfinitiveChip: React.FC<InfinitiveChipProps> = ({
   hasXP,
 }) => {
   const [open, setOpen] = useState<boolean>(false);
+  const [offset, setOffset] = useState<number>(0);
   const ref = useRef<HTMLSpanElement | null>(null);
+  const popupRef = useRef<HTMLSpanElement | null>(null);
 
   useEffect(() => {
     const h = (e: MouseEvent) => {
@@ -34,6 +36,25 @@ export const InfinitiveChip: React.FC<InfinitiveChipProps> = ({
     return () => document.removeEventListener('mousedown', h);
   }, []);
 
+  useEffect(() => {
+    if (open && popupRef.current) {
+      // Only calculate offset on desktop/tablet where it's absolute
+      if (window.innerWidth > 640) {
+        const rect = popupRef.current.getBoundingClientRect();
+        const vw = window.innerWidth;
+        const margin = 16;
+        
+        if (rect.left < margin) {
+          setOffset(margin - rect.left);
+        } else if (rect.right > vw - margin) {
+          setOffset(vw - margin - rect.right);
+        } else {
+          setOffset(0);
+        }
+      }
+    }
+  }, [open]);
+
   const handleClick = (e: React.MouseEvent<HTMLSpanElement>) => {
     e.stopPropagation();
     if (!isRevealed && onWordClick) onWordClick(idx);
@@ -41,7 +62,7 @@ export const InfinitiveChip: React.FC<InfinitiveChipProps> = ({
   };
 
   return (
-    <span className="inf-chip-wrapper" ref={ref} style={{ position: 'relative' }}>
+    <span className="inf-chip-wrapper" ref={ref}>
       <span
         onClick={handleClick}
         className={`inf-chip ${isRevealed ? 'revealed' : ''} ${hasXP ? 'xp-flash' : ''}`}
@@ -51,7 +72,11 @@ export const InfinitiveChip: React.FC<InfinitiveChipProps> = ({
       </span>
 
       {open && (
-        <span className="inf-popup animate-pop">
+        <span 
+          className="inf-popup animate-pop" 
+          ref={popupRef}
+          style={offset !== 0 ? { transform: `translateX(calc(-50% + ${offset}px))` } : {}}
+        >
           <span
             className="popup-close"
             onClick={(e: React.MouseEvent<HTMLSpanElement>) => {
@@ -59,7 +84,7 @@ export const InfinitiveChip: React.FC<InfinitiveChipProps> = ({
               setOpen(false);
             }}
           >
-            <X size={12} />
+            <X size={16} />
           </span>
           <span className="popup-word">{word}</span>
           <span className="popup-meaning">
